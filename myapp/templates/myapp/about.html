@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>О проекте</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-light: #f4f4f4;
+      --bg-dark: #1c1c1c;
+      --text-light: #111;
+      --text-dark: #f1f1f1;
+      --primary: #4A90E2;
+      --primary-dark: #357ABD;
+      --card-light: #fff;
+      --card-dark: #292929;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      transition: all 0.3s ease;
+    }
+
+    body {
+      font-family: 'Rubik', sans-serif;
+      background-color: var(--bg-light);
+      color: var(--text-light);
+      padding: 2rem;
+    }
+
+    body.dark {
+      background-color: var(--bg-dark);
+      color: var(--text-dark);
+    }
+
+    .container {
+      max-width: 650px;
+      margin: auto;
+      background-color: var(--card-light);
+      border-radius: 16px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+      padding: 2rem;
+
+      /* 🎬 Анимация появления */
+      opacity: 0;
+      transform: translateY(100px);
+      animation: slideUpFade 0.8s ease-out forwards;
+    }
+
+    @keyframes slideUpFade {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    body.dark .container {
+      background-color: var(--card-dark);
+      box-shadow: 0 12px 30px rgba(255, 255, 255, 0.05);
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+      color: var(--primary);
+    }
+
+    p {
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+      line-height: 1.6;
+    }
+
+    ul {
+      margin-left: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    ul li {
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .telegram-button {
+      display: inline-block;
+      background: linear-gradient(to right, #0088cc, #005577);
+      color: #fff;
+      text-decoration: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 0.95rem;
+      margin-top: 1.5rem;
+      box-shadow: 0 5px 15px rgba(0, 136, 204, 0.3);
+      transition: transform 0.3s ease, background 0.3s ease;
+    }
+
+    .telegram-button:hover {
+      background: linear-gradient(to right, #007bb5, #004466);
+      transform: scale(1.05);
+    }
+
+    .back-button {
+      display: inline-block;
+      margin-bottom: 1.5rem;
+      background: transparent;
+      border: 2px solid var(--primary);
+      color: var(--primary);
+      padding: 0.4rem 1rem;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .back-button:hover {
+      background-color: var(--primary);
+      color: #fff;
+      transform: scale(1.05);
+    }
+
+    .theme-toggle {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: 2px solid var(--primary);
+      border-radius: 50%;
+      padding: 0.6rem;
+      cursor: pointer;
+      color: var(--primary);
+      background-color: #fff;
+    }
+
+    body.dark .theme-toggle {
+      background-color: #1c1c1c;
+      color: #fff;
+      border-color: #fff;
+    }
+
+    .theme-toggle i {
+      font-size: 1.2rem;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 1.2rem;
+      }
+
+      h1 {
+        font-size: 1.6rem;
+      }
+
+      p, ul li {
+        font-size: 0.95rem;
+      }
+
+      .telegram-button, .back-button {
+        font-size: 0.9rem;
+        padding: 0.5rem 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <button class="theme-toggle" onclick="toggleTheme()" title="Переключить тему">
+    <i class="fa-solid fa-moon"></i>
+  </button>
+
+  <div class="container">
+    <a href="/" class="back-button"><i class="fa-solid fa-arrow-left"></i> Назад в главное меню</a>
+
+    <a href="wish/" class="telegram-button" style="display: inline-block; margin-top: 0.8rem;">
+    <i class="fa-solid fa-feather"></i> Доска пожеланий
+    </a>
+
+    <h1><i class="fa-solid fa-bolt"></i> О проекте</h1>
+
+    <p>Этот сайт — мой учебный проект, сделанный на Django и Django REST Framework. Я начал его, чтобы прокачаться в создании современных веб-приложений.</p>
+
+    <p>Сайт включает в себя:</p>
+    <ul>
+      <li>Авторизацию и регистрацию пользователей</li>
+      <li>Посты и комментарии</li>
+      <li>Лайки и уведомления</li>
+      <li>Возможность загружать изображения</li>
+    </ul>
+
+    <p>Проект будет развиваться и дополняться новыми фичами. Спасибо, что заглянул!</p>
+
+    <a href="https://t.me/Den4kkk5" class="telegram-button" target="_blank">
+      <i class="fa-brands fa-telegram"></i> Написать мне в Telegram
+    </a>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      document.body.classList.toggle('dark');
+      if (document.body.classList.contains('dark')) {
+        localStorage.setItem('theme', 'dark');
+      } else {
+        localStorage.setItem('theme', 'light');
+      }
+    }
+
+    window.onload = function () {
+      if (localStorage.getItem('theme') === 'dark') {
+        document.body.classList.add('dark');
+      }
+    };
+  </script>
+</body>
+</html>

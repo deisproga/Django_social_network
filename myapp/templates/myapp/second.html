@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <title>Обратный отсчёт</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #222;
+            color: #eee;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+        #countdown {
+            font-size: 4rem;
+            background: #4A90E2;
+            padding: 20px 40px;
+            border-radius: 15px;
+            letter-spacing: 3px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<h1>До конца лета осталось:</h1>
+<div id="countdown">Загрузка...</div>
+
+<script>
+    const targetDate = new Date("{{ target_date }}").getTime();
+
+    function updateCountdown() {
+        const now = new Date().getTime();
+        const diff = targetDate - now;
+
+        if (diff <= 0) {
+            document.getElementById('countdown').innerHTML = "Лето закончилось! ☀️";
+            clearInterval(timerInterval);
+            return;
+        }
+
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+        document.getElementById('countdown').innerHTML =
+            days + "д " + hours.toString().padStart(2, '0') + ":" +
+            minutes.toString().padStart(2, '0') + ":" +
+            seconds.toString().padStart(2, '0');
+    }
+
+    updateCountdown();  // сразу обновим
+    const timerInterval = setInterval(updateCountdown, 1000);  // каждую секунду
+</script>
+
+</body>
+</html>

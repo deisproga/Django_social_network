@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Чат</title>
+<style>
+    :root {
+        --primary: #0d6efd;
+        --bg-dark: #121212;
+        --bg-light: #1e1e1e;
+        --border-color: #2c2c2c;
+        --text-light: #e0e0e0;
+        --text-muted: #a0a0a0;
+        --sender-bg: #0d6efd;
+        --receiver-bg: #2a2a2a;
+    }
+
+    body {
+        margin: 0;
+        background: var(--bg-dark);
+        font-family: 'Segoe UI', sans-serif;
+        color: var(--text-light);
+    }
+
+    #chat-toggle {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        background: linear-gradient(135deg, #0d6efd, #0046d5);
+        color: white;
+        padding: 12px 20px;
+        cursor: pointer;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        user-select: none;
+        z-index: 1000;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+
+    #chat-toggle:hover {
+        background: linear-gradient(135deg, #0062ff, #003bbf);
+        transform: scale(1.05);
+    }
+
+    #chat-box {
+        position: fixed;
+        bottom: 70px;
+        left: 20px;
+        width: 370px;
+        max-height: 500px;
+        background: var(--bg-light);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        box-shadow: 0 0 25px rgba(0, 0, 0, 0.7);
+        display: none;
+        flex-direction: column;
+        overflow: hidden;
+        z-index: 1000;
+    }
+
+    #chat-header {
+        background: var(--primary);
+        color: white;
+        padding: 14px;
+        font-weight: bold;
+        font-size: 16px;
+        text-align: center;
+    }
+
+    #chat-content {
+        display: flex;
+        height: 360px;
+        background: var(--bg-light);
+    }
+
+    #chat-list {
+        width: 35%;
+        border-right: 1px solid var(--border-color);
+        overflow-y: auto;
+        padding: 10px;
+        box-sizing: border-box;
+        background: #161616;
+    }
+
+    .chat-item {
+        padding: 10px;
+        cursor: pointer;
+        border-radius: 6px;
+        transition: 0.3s;
+        color: var(--text-light);
+    }
+
+    .chat-item:hover, .chat-item.active {
+        background: var(--primary);
+        color: white;
+    }
+
+    #chat-messages {
+        width: 65%;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        overflow-y: auto;
+        box-sizing: border-box;
+        background: var(--bg-dark);
+    }
+
+    .message {
+        margin-bottom: 10px;
+        padding: 8px 12px;
+        border-radius: 18px;
+        max-width: 80%;
+        word-wrap: break-word;
+        font-size: 14px;
+    }
+
+    .sender {
+        background: var(--sender-bg);
+        color: white;
+        align-self: flex-end;
+        border-bottom-right-radius: 0;
+    }
+
+    .receiver {
+        background: var(--receiver-bg);
+        color: var(--text-light);
+        align-self: flex-start;
+        border-bottom-left-radius: 0;
+    }
+
+    #chat-input {
+        display: flex;
+        border-top: 1px solid var(--border-color);
+        padding: 10px;
+        background: #1a1a1a;
+    }
+
+    #chat-input textarea {
+        flex-grow: 1;
+        resize: none;
+        padding: 10px;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        background: #2c2c2c;
+        color: white;
+        font-size: 14px;
+        outline: none;
+    }
+
+    #chat-input button {
+        background: var(--primary);
+        border: none;
+        color: white;
+        padding: 10px 18px;
+        cursor: pointer;
+        margin-left: 10px;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: 0.2s;
+    }
+
+    #chat-input button:hover {
+        background: #0052cc;
+    }
+
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #1e1e1e;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #555;
+        border-radius: 4px;
+    }
+</style>
+</head>
+<body>
+
+<div id="chat-toggle">Чат</div>
+
+<div id="chat-box">
+    <div id="chat-header">Чаты</div>
+    <div id="chat-content">
+        <div id="chat-list"></div>
+        <div id="chat-messages">Выберите чат слева</div>
+    </div>
+    <div id="chat-input" style="display:none;">
+        <textarea id="chat-text" rows="2" placeholder="Написать сообщение..."></textarea>
+        <button id="chat-send">Отправить</button>
+    </div>
+</div>
+
+<script>
+    const currentUser = "{{ request.user.username }}";
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            for (let cookie of document.cookie.split(';')) {
+                cookie = cookie.trim();
+                if (cookie.startsWith(name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    const toggleBtn = document.getElementById('chat-toggle');
+    const chatBox = document.getElementById('chat-box');
+    const chatList = document.getElementById('chat-list');
+    const chatMessages = document.getElementById('chat-messages');
+    const chatInput = document.getElementById('chat-input');
+    const chatText = document.getElementById('chat-text');
+    const sendBtn = document.getElementById('chat-send');
+
+    let activeChatId = null;
+
+    toggleBtn.onclick = () => {
+        chatBox.style.display = (chatBox.style.display === 'none' || chatBox.style.display === '') ? 'flex' : 'none';
+        if (chatBox.style.display === 'flex') loadChats();
+    };
+
+    function loadChats() {
+        const chats = [
+            { chat_id: 1, participants: ['denchik', 'admin'] },
+            { chat_id: 2, participants: ['denchik', 'second_acc'] }
+        ];
+
+        chatList.innerHTML = '';
+        chatMessages.innerHTML = 'Выберите чат слева';
+        chatInput.style.display = 'none';
+
+        if (chats.length === 0) {
+            chatList.innerHTML = '<p style="color: var(--text-muted);">Чатов нет</p>';
+            return;
+        }
+
+        chats.forEach(chat => {
+            const item = document.createElement('div');
+            item.classList.add('chat-item');
+            item.textContent = chat.participants.join(', ');
+            item.onclick = () => selectChat(chat.chat_id, item);
+            chatList.appendChild(item);
+        });
+    }
+
+    function selectChat(chatId, elem) {
+        activeChatId = chatId;
+        document.querySelectorAll('.chat-item').forEach(i => i.classList.remove('active'));
+        elem.classList.add('active');
+        loadMessages(chatId);
+        chatInput.style.display = 'flex';
+    }
+
+    function loadMessages(chatId) {
+        fetch(`/api/chat_messages/${chatId}/`)
+            .then(resp => resp.json())
+            .then(data => {
+                chatMessages.innerHTML = '';
+                if (data.length === 0) {
+                    chatMessages.innerHTML = '<p style="color: var(--text-muted);">Сообщений нет</p>';
+                    return;
+                }
+                data.forEach(msg => {
+                    const div = document.createElement('div');
+                    div.className = `message ${msg.sender === currentUser ? 'sender' : 'receiver'}`;
+                    div.textContent = `${msg.sender}: ${msg.text}`;
+                    chatMessages.appendChild(div);
+                });
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            });
+    }
+
+    sendBtn.onclick = () => {
+        const text = chatText.value.trim();
+        if (!text) return alert('Напиши сообщение!');
+        fetch(`/api/send_message/${activeChatId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({ text })
+        })
+        .then(resp => resp.json())
+        .then(data => {
+            if (data.error) return alert(data.error);
+            const div = document.createElement('div');
+            div.className = 'message sender';
+            div.textContent = `${data.sender}: ${data.text}`;
+            chatMessages.appendChild(div);
+            chatText.value = '';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        })
+        .catch(err => {
+            alert('Ошибка при отправке');
+            console.error(err);
+        });
+    };
+</script>
+
+</body>
+</html>

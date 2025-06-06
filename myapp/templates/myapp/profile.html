@@ -1,0 +1,163 @@
+{% extends "myapp/home.html" %}
+
+{% block content %}
+<style>
+    .profile-container {
+        background: #fff;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+        margin-bottom: 20px;
+    }
+
+    .profile-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 10px;
+    }
+
+    .profile-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 1px solid #ddd;
+    }
+
+    .profile-username {
+        font-size: 22px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .profile-bio {
+        margin-top: 10px;
+        font-size: 14px;
+        color: #555;
+    }
+
+    .post-card {
+        background: #fff;
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.04);
+        margin-bottom: 15px;
+    }
+
+    .post-card img {
+        margin-top: 10px;
+        max-width: 100%;
+        border-radius: 8px;
+    }
+
+    .post-date {
+        font-size: 12px;
+        color: #888;
+        margin-bottom: 6px;
+    }
+
+    .profile-actions {
+        margin-top: 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .profile-actions a {
+        text-decoration: none;
+        color: #4CAF50;
+        font-weight: 500;
+    }
+
+    .profile-actions a.logout {
+        color: #e53935;
+    }
+
+    .friend-button {
+        margin-top: 15px;
+        padding: 10px 18px;
+        background-color: #4CAF50;
+        color: white;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        text-align: center;
+        display: inline-block;
+        transition: background-color 0.3s ease;
+        text-decoration: none;
+        user-select: none;
+    }
+    .friend-button:hover {
+        background-color: #45a049;
+    }
+    .friend-status {
+        margin-top: 15px;
+        font-weight: 600;
+        color: #555;
+    }
+
+    .back-link {
+        margin-top: 20px;
+        display: inline-block;
+        color: #555;
+        text-decoration: none;
+        font-size: 14px;
+    }
+
+    .back-link:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<div class="profile-container">
+    <div class="profile-header">
+        {% if profile_user.avatar %}
+            <img src="{{ profile_user.avatar.url }}" alt="Avatar" class="profile-avatar">
+        {% endif %}
+        <div class="profile-username">Профиль: {{ profile_user.username }}</div>
+    </div>
+
+    {% if profile_user.bio %}
+        <p class="profile-bio">{{ profile_user.bio }}</p>
+    {% endif %}
+
+    {% if request.user != profile_user %}
+        {% if sent_request %}
+            {% if sent_request.accepted %}
+                <p class="friend-status">Вы друзья</p>
+            {% else %}
+                <p class="friend-status">Заявка отправлена</p>
+                <a href="{% url 'cancel_friend_request' profile_user.id %}" class="friend-button">Отменить заявку</a>
+            {% endif %}
+        {% elif received_request %}
+            <p class="friend-status">Пользователь отправил вам заявку</p>
+            <a href="{% url 'accept_friend_request' received_request.id %}" class="friend-button">Принять заявку</a>
+        {% else %}
+            <a href="{% url 'send_friend_request' profile_user.id %}" class="friend-button">Добавить в друзья</a>
+        {% endif %}
+    {% else %}
+        <div class="profile-actions">
+            {# <a href="{% url 'profile_edit' %}">Редактировать профиль</a> #}
+            <a href="{% url 'logout' %}" class="logout">Выйти из аккаунта</a>
+        </div>
+    {% endif %}
+</div>
+
+<h3 style="margin-bottom: 10px;">Посты пользователя</h3>
+
+{% for post in posts %}
+    <div class="post-card">
+        <p class="post-date">{{ post.created_at|date:"d M Y H:i" }}</p>
+        <p>{{ post.text }}</p>
+        {% if post.image %}
+            <img src="{{ post.image.url }}" alt="post image">
+        {% endif %}
+    </div>
+{% empty %}
+    <p>Постов пока нет.</p>
+{% endfor %}
+
+<a href="{% url 'home' %}" class="back-link">← Назад к ленте</a>
+{% endblock %}

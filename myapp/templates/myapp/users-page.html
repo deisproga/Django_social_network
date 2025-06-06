@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head><title>Пользователи</title></head>
+<body>
+    <h1>Все пользователи</h1>
+    <ul id="user-list"></ul>
+    <div id="user-details"></div>
+
+    <script>
+        async function loadUsers() {
+            const res = await fetch('/api/users/');
+            const users = await res.json();
+            const list = document.getElementById('user-list');
+            list.innerHTML = '';
+            users.forEach(user => {
+                const li = document.createElement('li');
+                li.innerHTML = `<a href="#" onclick="loadProfile(${user.id})">${user.username}</a>`;
+                list.appendChild(li);
+            });
+        }
+
+        async function loadProfile(id) {
+            const res = await fetch(`/api/users/${id}/`);
+            const user = await res.json();
+            document.getElementById('user-details').innerHTML = `
+                <h2>Профиль: ${user.username}</h2>
+                <p>Email: ${user.email}</p>
+            `;
+        }
+
+        loadUsers();
+    </script>
+</body>
+</html>

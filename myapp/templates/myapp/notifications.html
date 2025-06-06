@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <title>Уведомления</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Подключение шрифта -->
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Иконки -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --bg: #f3f4f6;
+            --white: #ffffff;
+            --text: #111827;
+            --gray: #6b7280;
+            --hover-bg: #e0e7ff;
+            --shadow-light: rgba(79, 70, 229, 0.15);
+            --shadow-hover: rgba(79, 70, 229, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Rubik', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+        }
+
+        /* Анимация подъёма контейнера */
+        .container {
+            max-width: 700px;
+            margin: 60px auto;
+            background-color: var(--white);
+            padding: 40px 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px var(--shadow-light);
+            opacity: 0;
+            transform: translateY(100px);
+            animation: slideUpFade 0.8s ease-out forwards;
+        }
+
+        @keyframes slideUpFade {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 30px;
+            user-select: none;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        /* Карточки уведомлений */
+        li {
+            background-color: var(--white);
+            padding: 20px 25px;
+            margin-bottom: 18px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            box-shadow: 0 4px 15px var(--shadow-light);
+            cursor: default;
+
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.5s ease forwards;
+            animation-delay: var(--delay);
+            transition: box-shadow 0.3s ease, transform 0.3s ease;
+        }
+
+        /* При наведении чуть увеличиваем и усиливаем тень */
+        li:hover {
+            box-shadow: 0 10px 30px var(--shadow-hover);
+            transform: translateY(-5px);
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .icon {
+            font-size: 1.5rem;
+            color: var(--primary);
+            flex-shrink: 0;
+            user-select: none;
+        }
+
+        .text {
+            font-size: 1.1rem;
+            color: var(--text);
+            user-select: text;
+        }
+
+        .no-notifications {
+            text-align: center;
+            font-size: 1.3rem;
+            color: var(--gray);
+            padding: 30px 0;
+            user-select: none;
+            font-style: italic;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 40px;
+            text-align: center;
+            text-decoration: none;
+            font-weight: 600;
+            color: var(--primary);
+            transition: color 0.3s ease, transform 0.3s ease;
+            width: 100%;
+            user-select: none;
+        }
+
+        .back-link:hover {
+            color: #3730a3;
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 500px) {
+            .container {
+                margin: 20px;
+                padding: 25px 20px;
+            }
+
+            h1 {
+                font-size: 1.6rem;
+            }
+
+            .text {
+                font-size: 1rem;
+            }
+
+            li {
+                padding: 16px 20px;
+                gap: 14px;
+            }
+
+            .icon {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fa-solid fa-bell"></i> Твои уведомления</h1>
+
+        {% if notifications %}
+            <ul>
+                {% for notification in notifications %}
+                    <li style="--delay: {{ forloop.counter0|add:"0.2"|floatformat:1 }}s;">
+                        <i class="fa-solid fa-circle-info icon"></i>
+                        <span class="text">{{ notification.message }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="no-notifications"><i class="fa-regular fa-face-smile"></i> У тебя пока нет новых уведомлений.</p>
+        {% endif %}
+
+        <a href="{% url 'home' %}" class="back-link">⬅ Вернуться на главную</a>
+    </div>
+</body>
+</html>

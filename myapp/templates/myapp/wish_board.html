@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <title>Анонимная доска пожеланий</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f4f8;
+            padding: 30px;
+            max-width: 600px;
+            margin: auto;
+            position: relative;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        h1 {
+            text-align: center;
+            color: #4f46e5;
+        }
+        form {
+            display: flex;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+        textarea {
+            flex: 1;
+            padding: 10px;
+            font-size: 1rem;
+            resize: none;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+        select {
+            width: 120px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        button {
+            background: #4f46e5;
+            color: white;
+            border: none;
+            padding: 0 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #3b37b5;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            background: white;
+            margin-bottom: 15px;
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 6px rgb(0 0 0 / 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            position: relative;
+        }
+        .wish-text {
+            word-break: break-word;
+            font-size: 1.1rem;
+        }
+        .actions-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .timer {
+            color: #888;
+            font-size: 0.9rem;
+            font-weight: 600;
+            white-space: nowrap;
+            min-width: 140px;
+            text-align: center;
+        }
+        .like-btn {
+            background: #ddd;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            font-size: 1.2rem;
+            border: none;
+            cursor: pointer;
+            color: #4f46e5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background 0.2s ease;
+        }
+        .like-btn:hover {
+            background: #c7d2fe;
+        }
+        .likes-count {
+            color: #555;
+            font-weight: 600;
+            min-width: 20px;
+            text-align: center;
+            user-select: none;
+        }
+        .complain-form {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-top: 4px;
+        }
+        .complain-form input[type="text"] {
+            flex: 1;
+            padding: 6px 8px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 0.9rem;
+        }
+        .complain-form button {
+            background: #e53e3e;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.2s ease;
+        }
+        .complain-form button:hover {
+            background: #c53030;
+        }
+        .delete-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #ddd;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            font-size: 1.2rem;
+            border: none;
+            cursor: pointer;
+            color: #f87171;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background 0.2s ease;
+        }
+        .delete-btn:hover {
+            background: #f87171;
+            color: white;
+        }
+
+        /* Кнопка назад */
+        .back-button {
+            position: fixed;
+            left: 50%;
+            bottom: 0;
+            transform: translateX(-50%) translateY(calc(100% - 30px));
+            background: #4f46e5;
+            color: white;
+            border-radius: 12px 12px 0 0;
+            padding: 12px 30px;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            box-shadow: 0 -4px 10px rgba(79, 70, 229, 0.5);
+            white-space: nowrap;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            opacity: 0.3;
+            user-select: none;
+            z-index: 1000;
+        }
+        .back-button:hover {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Анонимная доска пожеланий</h1>
+
+    <form id="wish-form" method="post" action="{% url 'add_wish' %}">
+        {% csrf_token %}
+        <textarea name="text" rows="3" placeholder="Напиши своё пожелание (до 300 символов)" required></textarea>
+        <select name="lifetime" required>
+            <option value="3600">1 час</option>
+            <option value="7200">2 часа</option>
+            <option value="14400" selected>4 часа</option>
+            <option value="28800">8 часов</option>
+            <option value="86400">24 часа</option>
+        </select>
+        <button type="submit">Отправить</button>
+    </form>
+
+    <ul id="wishes-list">
+        {% for wish in wishes %}
+        <li data-created="{{ wish.created_timestamp }}" data-lifetime="{{ wish.lifetime_seconds }}">
+            <div class="wish-text">{{ wish.text|linebreaksbr }}</div>
+
+            <div class="actions-row">
+                <form method="post" action="{% url 'like_wish' wish.id %}" style="display:flex; align-items:center; gap:6px;">
+                    {% csrf_token %}
+                    <button type="submit" class="like-btn" title="Поставить лайк">👍</button>
+                    <span class="likes-count">{{ wish.likes }}</span>
+                </form>
+
+                <button class="delete-btn" title="Удалить пожелание">✖</button>
+
+                <span class="timer">Загрузка...</span>
+            </div>
+
+            <form method="post" action="{% url 'complain_wish' wish.id %}" class="complain-form">
+                {% csrf_token %}
+                <input type="text" name="reason" placeholder="Причина жалобы (необязательно)">
+                <button type="submit">Пожаловаться</button>
+            </form>
+        </li>
+        {% empty %}
+        <li>Пока нет пожеланий. Будь первым!</li>
+        {% endfor %}
+    </ul>
+
+    <a href="/" class="back-button">← Назад в главное меню</a>
+
+<script>
+    function secondsToHMS(seconds) {
+        const hrs = Math.floor(seconds / 3600);
+        const mins = Math.floor((seconds % 3600) / 60);
+        const secs = seconds % 60;
+        return `${hrs.toString().padStart(2,'0')}:${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+    }
+
+    function updateTimers() {
+        const now = Math.floor(Date.now() / 1000);
+        document.querySelectorAll('#wishes-list li').forEach(li => {
+            const created = parseInt(li.dataset.created);
+            const lifetime = parseInt(li.dataset.lifetime);
+            const elapsed = now - created;
+            const remaining = lifetime - elapsed;
+
+            const timerSpan = li.querySelector('.timer');
+            if (remaining > 0) {
+                timerSpan.textContent = `Удалится через: ${secondsToHMS(remaining)}`;
+                li.style.opacity = '1';
+            } else {
+                li.style.opacity = '0';
+                setTimeout(() => {
+                    li.remove();
+                    // TODO: Отправить запрос на сервер для удаления пожелания
+                }, 500);
+            }
+        });
+    }
+
+    setInterval(updateTimers, 1000);
+    updateTimers();
+
+    // Обработка кнопок удаления пожеланий
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', e => {
+            const li = e.target.closest('li');
+            li.style.opacity = '0';
+            setTimeout(() => {
+                li.remove();
+                // TODO: Отправить запрос на сервер для удаления пожелания
+            }, 500);
+        });
+    });
+</script>
+
+</body>
+</html>

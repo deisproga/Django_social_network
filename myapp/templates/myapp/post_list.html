@@ -1,0 +1,211 @@
+{% extends "myapp/home.html" %}
+
+{% block content %}
+<style>
+    :root {
+        --bg-color: #f5f6fa;
+        --card-bg: #ffffff;
+        --border-color: #e6e9ef;
+        --text-color: #2f3640;
+        --secondary-text: #7f8fa6;
+        --accent: #ff7675;
+        --like-bg: #ffeaa7;
+        --comment-bg: #f1f2f6;
+        --radius: 12px;
+        --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        --transition: 0.3s ease;
+    }
+
+    body {
+        background-color: var(--bg-color);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: var(--text-color);
+    }
+
+    .feed-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 40px 20px;
+    }
+
+    h2 {
+        text-align: center;
+        font-size: 28px;
+        margin-bottom: 30px;
+    }
+
+    .post {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        padding: 20px;
+        margin-bottom: 30px;
+        box-shadow: var(--shadow);
+        transition: var(--transition);
+    }
+
+    .post:hover {
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    }
+
+    .post-header {
+        font-size: 14px;
+        color: var(--secondary-text);
+        margin-bottom: 12px;
+    }
+
+    .post-text {
+        font-size: 16px;
+        line-height: 1.6;
+        margin-bottom: 10px;
+    }
+
+    .post-image {
+        width: 100%;
+        max-height: 400px;
+        object-fit: cover;
+        border-radius: var(--radius);
+        margin: 15px 0;
+    }
+
+    .like-btn {
+        background: var(--like-bg);
+        border: none;
+        padding: 6px 12px;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .like-btn:hover {
+        background: #fdcb6e;
+    }
+
+    .login-link {
+        color: var(--accent);
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .login-link:hover {
+        text-decoration: underline;
+    }
+
+    .comment-section {
+        border-top: 1px solid #dcdde1;
+        margin-top: 20px;
+        padding-top: 15px;
+    }
+
+    .comment {
+        background: var(--comment-bg);
+        padding: 10px 15px;
+        margin-bottom: 10px;
+        border-radius: var(--radius);
+    }
+
+    .comment strong {
+        color: var(--text-color);
+    }
+
+    .comment-like-btn {
+        background: transparent;
+        border: none;
+        font-size: 14px;
+        cursor: pointer;
+        margin-top: 5px;
+    }
+
+    .comment-form textarea {
+        width: 100%;
+        padding: 10px;
+        border-radius: var(--radius);
+        border: 1px solid var(--border-color);
+        margin-top: 10px;
+        resize: vertical;
+        font-size: 14px;
+    }
+
+    .comment-submit-btn {
+        margin-top: 10px;
+        background: var(--accent);
+        border: none;
+        padding: 8px 16px;
+        color: white;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .comment-submit-btn:hover {
+        background: #d63031;
+    }
+
+    .no-posts {
+        text-align: center;
+        font-size: 18px;
+        color: var(--secondary-text);
+        margin-top: 50px;
+    }
+</style>
+
+<div class="feed-container">
+    <h2>Лента постов</h2>
+
+    {% for post in posts %}
+        <div class="post">
+            <div class="post-header">
+                <strong>{{ post.author.username }}</strong> — {{ post.created_at|date:"d M Y H:i" }}
+            </div>
+
+            <div class="post-text">{{ post.text }}</div>
+
+            {% if post.image %}
+                <img src="{{ post.image.url }}" alt="post image" class="post-image">
+            {% endif %}
+
+            {% if user.is_authenticated %}
+                <form method="post" action="{% url 'like_post' post.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="like-btn">❤️ {{ post.likes.count }}</button>
+                </form>
+            {% else %}
+                <p><a href="{% url 'login' %}" class="login-link">Войдите</a>, чтобы ставить лайки.</a></p>
+            {% endif %}
+
+            <div class="comment-section">
+                <h4>Комментарии:</h4>
+
+                {% for comment in post.comments.all %}
+                    <div class="comment">
+                        <p><strong>{{ comment.author.username }}</strong>: {{ comment.text }}</p>
+
+                        {% if user.is_authenticated %}
+                            <form method="post" action="{% url 'like_comment' comment.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="comment-like-btn">👍 {{ comment.likes.count }}</button>
+                            </form>
+                        {% endif %}
+                    </div>
+                {% empty %}
+                    <p style="color: var(--secondary-text);">Комментариев пока нет.</p>
+                {% endfor %}
+            </div>
+
+            {% if user.is_authenticated %}
+                <form method="post" class="comment-form">
+                    {% csrf_token %}
+                    {{ comment_form.text }}
+                    <input type="hidden" name="post_id" value="{{ post.id }}">
+                    <button type="submit" class="comment-submit-btn">Оставить комментарий</button>
+                </form>
+            {% else %}
+                <p><a href="{% url 'login' %}" class="login-link">Войдите</a>, чтобы оставить комментарий.</p>
+            {% endif %}
+        </div>
+    {% empty %}
+        <p class="no-posts">Постов пока нет.</p>
+    {% endfor %}
+</div>
+{% endblock %}
+

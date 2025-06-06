@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <title>Главная</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+
+        body.dark-theme {
+            background-color: #121212;
+            color: #ddd;
+        }
+
+        .navbar {
+            background-color: #ffffff;
+            padding: 1rem 2rem;
+            color: #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .navbar a {
+            color: #333;
+            text-decoration: none;
+            margin-left: 1rem;
+            font-weight: 700;
+            transition: opacity 0.3s, transform 0.3s;
+        }
+
+        .navbar a:hover {
+            opacity: 0.8;
+            transform: scale(1.05);
+        }
+
+        .brand a {
+            font-size: 1.8rem;
+            color: #333;
+            text-decoration: none;
+            font-weight: 900;
+            letter-spacing: 2px;
+            user-select: none;
+        }
+
+        .theme-toggle {
+            background-color: #4A90E2;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 0.5rem 1.2rem;
+            margin-left: 1rem;
+            cursor: pointer;
+            font-weight: 700;
+            transition: background 0.4s, color 0.4s, transform 0.3s;
+            box-shadow: 0 4px 6px rgba(74,144,226,0.3);
+            user-select: none;
+        }
+
+        body.dark-theme .theme-toggle {
+            background-color: #444;
+            color: #ddd;
+            box-shadow: 0 4px 6px rgba(255,255,255,0.2);
+        }
+
+        .theme-toggle:hover {
+            background-color: #357ABD;
+            transform: scale(1.05);
+        }
+
+        body.dark-theme .theme-toggle:hover {
+            background-color: #666;
+        }
+
+        .container {
+            max-width: 820px;
+            margin: 100px auto 50px;
+            padding: 3rem 2.5rem;
+            text-align: center;
+            background: #ffffff;
+            border-radius: 25px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.05);
+            transition: background 0.5s, color 0.5s;
+        }
+
+        body.dark-theme .container {
+            background: #1e1e1e;
+            box-shadow: 0 12px 40px rgba(255, 255, 255, 0.05);
+        }
+
+        .welcome-card h1 {
+            font-size: 2.8rem;
+            margin-bottom: 1rem;
+            font-weight: 900;
+            letter-spacing: 2px;
+            user-select: none;
+            color: #1B1B1B;
+        }
+
+        body.dark-theme .welcome-card h1 {
+            color: #d9d9d9;
+        }
+
+        .welcome-card p {
+            font-size: 1.4rem;
+            color: #555;
+            user-select: none;
+        }
+
+        body.dark-theme .welcome-card p {
+            color: #bbb;
+        }
+
+        .btn {
+            display: inline-block;
+            margin: 1.4rem 0.7rem 0;
+            padding: 0.9rem 2rem;
+            background-color: #4A90E2;
+            color: white;
+            border: none;
+            border-radius: 14px;
+            text-decoration: none;
+            font-weight: 800;
+            font-size: 1.2rem;
+            box-shadow: 0 8px 15px rgba(74,144,226,0.4);
+            cursor: pointer;
+            transition: background-color 0.4s, transform 0.3s, box-shadow 0.3s;
+            user-select: none;
+        }
+
+        .btn:hover {
+            background-color: #357ABD;
+            transform: translateY(-4px) scale(1.05);
+            box-shadow: 0 12px 20px rgba(53,122,189,0.6);
+        }
+
+        .footer-buttons {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 200;
+        }
+
+        .notification-btn {
+            position: relative;
+            margin-left: 1rem;
+            user-select: none;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -8px;
+            right: -12px;
+            background: #FF3B3B;
+            color: white;
+            border-radius: 50%;
+            padding: 3px 7px;
+            font-size: 0.75rem;
+            font-weight: 900;
+            line-height: 1;
+            min-width: 20px;
+            text-align: center;
+            box-shadow: 0 0 5px #FF3B3B;
+        }
+
+        .container {
+            animation: fadeInUp 1.2s ease forwards;
+            opacity: 0;
+            transform: translateY(40px);
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 60px 1rem 30px;
+                padding: 2rem 1.5rem;
+                border-radius: 20px;
+            }
+
+            .welcome-card h1 {
+                font-size: 2rem;
+            }
+
+            .btn {
+                font-size: 1rem;
+                padding: 0.7rem 1.5rem;
+                border-radius: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <div class="brand">
+            <a href="{% url 'home' %}">Главная</a>
+        </div>
+        <div>
+            {% if user.is_authenticated %}
+                Привет, {{ user.username }} |
+                <a href="{% url 'my_profile' %}">Профиль</a>
+                <a href="{% url 'user_search' %}">Поиск юзеров</a> <!-- Кнопка для поиска -->
+                <a href="{% url 'notifications' %}" class="notification-btn">
+                    Уведомления
+                    {% if unread_notifications_count > 0 %}
+                        <span class="notification-badge">{{ unread_notifications_count }}</span>
+                    {% endif %}
+                </a>
+                <a href="{% url 'logout' %}">Выйти</a>
+            {% else %}
+                <a href="{% url 'login' %}">Вход</a>
+                <a href="{% url 'register' %}">Регистрация</a>
+                <a href="{% url 'user_search' %}">Поиск юзеров</a> <!-- Кнопка для поиска для неавторизованных -->
+            {% endif %}
+            <a href="{% url 'about' %}">О сайте</a>
+            <button class="theme-toggle" id="theme-toggle">Тёмная тема</button>
+        </div>
+    </div>
+
+    <div class="container welcome-card">
+        {% block content %}
+            <h1>Добро пожаловать!</h1>
+            <p>На сайте уже <strong>{{ user_count }}</strong> пользователей!</p>
+        {% endblock %}
+    </div>
+
+    {% if is_homepage %}
+    <div class="footer-buttons">
+        <a href="{% url 'post_list' %}" class="btn">Лента</a>
+        {% if user.is_authenticated %}
+            <a href="{% url 'create_post' %}" class="btn">Создать пост</a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <script>
+        const body = document.body;
+        const themeToggleBtn = document.getElementById('theme-toggle');
+
+        function setTheme(theme) {
+            if (theme === 'dark') {
+                body.classList.add('dark-theme');
+                themeToggleBtn.textContent = 'Светлая тема';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                body.classList.remove('dark-theme');
+                themeToggleBtn.textContent = 'Тёмная тема';
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        setTheme(savedTheme);
+
+        themeToggleBtn.addEventListener('click', () => {
+            const currentTheme = body.classList.contains('dark-theme') ? 'dark' : 'light';
+            setTheme(currentTheme === 'dark' ? 'light' : 'dark');
+        });
+    </script>
+
+</body>
+</html>
