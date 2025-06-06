@@ -9,7 +9,7 @@
 ## 🚀 Как запустить:
 ```bash
 git clone https://github.com/denchik/my-django-project.git
-cd my-django-project
+cd myproject
 pip install -r requirements.txt
 python manage.py migrate
 python manage.py runserver
