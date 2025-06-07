@@ -11,3 +11,4 @@
 cd myproject
 python manage.py migrate
 python manage.py runserver
+start with redis
